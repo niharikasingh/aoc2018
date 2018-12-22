@@ -1,11 +1,100 @@
-import copy, math
+import copy, collections, pdb
 
 debug = True
+
+def bfs(orig_map, start_cell, w, h, looking_for):
+    map = copy.deepcopy(orig_map)
+    current_nodes = collections.deque([[start_cell]])
+    found_nodes = []
+    while (len(found_nodes) == 0) and (len(current_nodes) > 0):
+        temp_index = len(current_nodes)
+        for i in range(temp_index):
+            curr_path = current_nodes.popleft()
+            last_node_on_path = curr_path[-1]
+            # print("Checking with node:", last_node_on_path)
+            map[last_node_on_path[0]][last_node_on_path[1]] = 'x'
+            # if (last_node_on_path == (1, 4)):
+            #     pdb.set_trace()
+            # check in reading order
+            if (last_node_on_path[0] > 0) and (map[last_node_on_path[0]-1][last_node_on_path[1]][0] in ['.', looking_for]):
+                # print("Got top")
+                new_path = copy.deepcopy(curr_path)
+                new_path.append((last_node_on_path[0]-1, last_node_on_path[1]))
+                current_nodes.append(new_path)
+                if (map[last_node_on_path[0]-1][last_node_on_path[1]][0] == looking_for):
+                    found_nodes.append(new_path)
+            if (last_node_on_path[1] > 0) and (map[last_node_on_path[0]][last_node_on_path[1]-1][0] in ['.', looking_for]):
+                # print("Got left")
+                new_path = copy.deepcopy(curr_path)
+                new_path.append((last_node_on_path[0], last_node_on_path[1]-1))
+                current_nodes.append(new_path)
+                if (map[last_node_on_path[0]][last_node_on_path[1]-1][0] == looking_for):
+                    found_nodes.append(new_path)
+            if (last_node_on_path[1] < w-1) and (map[last_node_on_path[0]][last_node_on_path[1]+1][0] in ['.', looking_for]):
+                # print("Got right")
+                new_path = copy.deepcopy(curr_path)
+                new_path.append((last_node_on_path[0], last_node_on_path[1]+1))
+                current_nodes.append(new_path)
+                if (map[last_node_on_path[0]][last_node_on_path[1]+1][0] == looking_for):
+                    found_nodes.append(new_path)
+            if (last_node_on_path[0] < h-1) and (map[last_node_on_path[0]+1][last_node_on_path[1]][0] in ['.', looking_for]):
+                # print("Got bottom")
+                new_path = copy.deepcopy(curr_path)
+                new_path.append((last_node_on_path[0]+1, last_node_on_path[1]))
+                current_nodes.append(new_path)
+                if (map[last_node_on_path[0]+1][last_node_on_path[1]][0] == looking_for):
+                    found_nodes.append(new_path)
+        # print("Current nodes:", current_nodes)
+        # print("Found_nodes", found_nodes)
+    if (len(found_nodes) == 0):
+        return (False, 0, False)
+    else:
+        found_nodes.sort(key=lambda x: x[-2])
+        found_nodes = [e for e in found_nodes if e[-2] == found_nodes[0][-2]]
+        found_nodes.sort(key=lambda x: x[1])
+        if (len(found_nodes[0]) == 2): # adjacent
+            return (False, 0, True)
+        elif (len(found_nodes[0]) == 3): # adjacent after moving
+            return (True, found_nodes[0][1], True)
+        return (True, found_nodes[0][1], False)
+
+def find_target(map, start_cell, w, h, looking_for):
+    # print(start_cell)
+    lowest_hp = 201
+    lowest_locations = []
+    if (start_cell[0] > 0) and (map[start_cell[0]-1][start_cell[1]][0] == looking_for):
+        if (map[start_cell[0]-1][start_cell[1]][1] == lowest_hp):
+            lowest_locations.append((start_cell[0]-1, start_cell[1]))
+        elif (map[start_cell[0]-1][start_cell[1]][1] < lowest_hp):
+            lowest_hp = map[start_cell[0]-1][start_cell[1]][1]
+            lowest_locations = [(start_cell[0]-1, start_cell[1])]
+    if (start_cell[0] < h-1) and (map[start_cell[0]+1][start_cell[1]][0] == looking_for):
+        if (map[start_cell[0]+1][start_cell[1]][1] == lowest_hp):
+            lowest_locations.append((start_cell[0]+1, start_cell[1]))
+        elif (map[start_cell[0]+1][start_cell[1]][1] < lowest_hp):
+            lowest_hp = map[start_cell[0]+1][start_cell[1]][1]
+            lowest_locations = [(start_cell[0]+1, start_cell[1])]
+    if (start_cell[1] > 0) and (map[start_cell[0]][start_cell[1]-1][0] == looking_for):
+        if (map[start_cell[0]][start_cell[1]-1][1] == lowest_hp):
+            lowest_locations.append((start_cell[0], start_cell[1]-1))
+        elif (map[start_cell[0]][start_cell[1]-1][1] < lowest_hp):
+            lowest_hp = map[start_cell[0]][start_cell[1]-1][1]
+            lowest_locations = [(start_cell[0], start_cell[1]-1)]
+    if (start_cell[1] < w-1) and (map[start_cell[0]][start_cell[1]+1][0] == looking_for):
+        if (map[start_cell[0]][start_cell[1]+1][1] == lowest_hp):
+            lowest_locations.append((start_cell[0], start_cell[1]+1))
+        elif (map[start_cell[0]][start_cell[1]+1][1] < lowest_hp):
+            lowest_hp = map[start_cell[0]][start_cell[1]+1][1]
+            lowest_locations = [(start_cell[0], start_cell[1]+1)]
+    lowest_locations.sort()
+    return lowest_locations[0]
 
 def turn(map):
     new_map = copy.deepcopy(map)
     width = len(map[0])
     height = len(map)
+    completed_turn = False
+
     for ri in range(height):
         for ci in range(width):
             # turns are based on starting positions
@@ -16,69 +105,25 @@ def turn(map):
                     looking_for = 'E'
                 else:
                     looking_for = 'G'
-                target_found = False
-                target = (-1, -1)
-                distance_to_target = math.inf
-                # find target cell
-                for tri in range(height):
-                    for tci in range(width):
-                        test_cell = new_map[tri][tci]
-                        # am i adjacent to enemy?
-                        if (len(test_cell) > 1) and (test_cell[0] == looking_for):
-                            if (abs(tri - ti) + abs(tci - ci) == 1):
-                                target = (tri, tci)
-                                target_found = True
-                                break
-                        # is this a cell adjacent to the enemy?
-                        elif ((looking_for == 'E') and (test_cell == '<')) or ((looking_for == 'G') and (test_cell == '>')):
-                            # check if reachable
-                            reachableY1 = True
-                            reachableY2 = True
-                            for step in range(min(ri + 1, tri), max(ri, tri)):
-                                if new_map[step][tci] not in ['.', '<', '>']:
-                                    reachable = False
-                                    break
-                            for step in range(min(ci + 1, tci), max(ci, tci)):
-                                if new_map[ri][step] not in ['.', '<', '>']:
-                                    reachable = False
-                                    break
-                            if (reachable):
-                                distance_to_this_target = abs(ri - tri) + abs(ci - tci)
-                                # is this the nearest?
-                                if (distance_to_this_target <= distance_to_target):
-                                    distance_to_target = distance_to_this_target
-                                    # is this the closest in reading order?
-                                    if (tri < target[0]):
-                                        target = (tri, tci)
-                                    elif (tri == target[0]) and (tci < target[1]):
-                                        target = (tri, tci)
-                    if (target_found):
-                        break
+                # find closest target
+                (can_move, next_move, can_attack) = bfs(new_map, (ri, ci), width, height, looking_for)
                 # move
-                if (target != (-1, -1)):
-                    replace_with = ''
-                    if (looking_for == 'E'):
-                        replace_with = '<'
-                    else:
-                        replace_with = '>'
-                    new_cell_loc = (-1, -1)
-                    old_cell_loc = (ri, ci)
-                    if (target[0] != ri):
-                        if (target[0] < ri):
-                            new_cell_loc = (ri-1, ci)
-                        else:
-                            new_cell_loc = (ri+1, ci)
-                    elif (target[1] != ci):
-                        if (target[1] < ci):
-                            new_cell_loc = (ri, ci-1)
-                        else:
-                            new_cell_loc = (ri, ci-1)
-                    new_map[new_cell_loc[0]][new_cell_loc[1]] = this_cell
-                    if ()
+                if (can_move):
+                    new_map[ri][ci] = '.'
+                    new_map[next_move[0]][next_move[1]] = this_cell
                 # attack
-                if (target_found) or (distance_to_target == 2):
+                if (can_attack):
+                    if (can_move):
+                        target = find_target(new_map, (next_move[0], next_move[1]), width, height, looking_for)
+                    else:
+                        target = find_target(new_map, (ri, ci), width, height, looking_for)
                     target_cell = new_map[target[0]][target[1]]
-                    target_cell[1] -= 3
+                    if (target_cell[1] <= 3):
+                        new_map[target[0]][target[1]] = '.'
+                        map[target[0]][target[1]] = '.'
+                    else:
+                        new_map[target[0]][target[1]] = (target_cell[0], target_cell[1]-3)
+                completed_turn = (can_move or can_attack)
     # check if combat over
     saw_G = False
     saw_E = False
@@ -89,20 +134,23 @@ def turn(map):
                     saw_G = True
                 if (c[0] == 'E'):
                     saw_E = True
-        if (sawG and sawE):
+        if (saw_G and saw_E):
             break
-    combat_over = not (sawG and sawE)
-    return (new_map, combat_over)
+    combat_over = not (saw_G and saw_E)
+    return (new_map, combat_over, completed_turn)
 
 def print_map(map):
     line_map = ''
     line_hps = ''
     for r in map:
-        line_map = ''.join(r) + '   '
-        line_hps = ''
+        line_map = ''
+        line_hps = '   '
         for c in r:
             if (len(c) > 1):
-                line_hps += c[0] + '(' + c[1] + ') '
+                line_map += c[0]
+                line_hps += c[0] + '(' + str(c[1]) + ') '
+            else:
+                line_map += c
         print(line_map + line_hps)
     print('\n\n')
 
@@ -118,12 +166,12 @@ def game(ifilename):
     combat_over = False
     turns = 0
     while (not combat_over):
-        (map, combat_over) = turn(map)
-        if (not combat_over):
+        (map, combat_over, completed_turn) = turn(map)
+        if (not combat_over) or (combat_over and completed_turn):
             turns += 1
         if (debug):
             print("Turn: ", turns)
-            print_map(map)
+            # print_map(map)
     sum_hp = 0
     for r in map:
         for c in r:
@@ -131,3 +179,11 @@ def game(ifilename):
                 sum_hp += c[1]
     print("Turns:", turns, "Sum:", sum_hp, "Outcome:", turns * sum_hp)
     return turns * sum_hp
+
+assert game('15input3.txt') == 36334
+# assert game('15input2.txt') == 27730
+assert game('15input4.txt') == 39514
+assert game('15input5.txt') == 27755
+assert game('15input6.txt') == 28944
+assert game('15input7.txt') == 18740
+game('15input1.txt')
