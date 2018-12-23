@@ -41,7 +41,7 @@ def bfs(map, start_cell, w, h, looking_for):
                     found_nodes.append(new_path)
             check_map[last_node_on_path[0]][last_node_on_path[1]] = False
         # print("Current nodes:", current_nodes)
-        # print("Found_nodes", found_nodes)
+    # print("Found_nodes", found_nodes)
     if (len(found_nodes) == 0):
         return (False, 0, False)
     else:
@@ -87,13 +87,14 @@ def find_target(map, start_cell, w, h, looking_for):
         return []
     return lowest_locations[0]
 
-def turn(map, moved_last_turn, killed_last_turn):
+def turn(map, moved_last_turn, killed_last_turn, points):
     new_map = copy.deepcopy(map)
     width = len(map[0])
     height = len(map)
     completed_turn = False
     moved_this_turn = False
     killed_this_turn = False
+    killed_elf = False
 
     for ri in range(height):
         for ci in range(width):
@@ -102,14 +103,18 @@ def turn(map, moved_last_turn, killed_last_turn):
             if (len(this_cell) > 1):
                 # print(ri, ci)
                 looking_for = ''
+                subtract_points = 0
                 if (this_cell[0] == 'G'):
                     looking_for = 'E'
+                    subtract_points = 3
                 else:
                     looking_for = 'G'
+                    subtract_points = points
                 # find closest target
-                if (moved_last_turn or killed_last_turn):
+                if (moved_last_turn or killed_last_turn or killed_this_turn):
                     (can_move, next_move, can_attack) = bfs(new_map, (ri, ci), width, height, looking_for)
                 else:
+                    # print("not doing bfs", moved_last_turn, killed_last_turn)
                     (can_move, next_move, can_attack) = (False, 0, True)
                 # move
                 if (can_move):
@@ -124,12 +129,14 @@ def turn(map, moved_last_turn, killed_last_turn):
                         target = find_target(new_map, (ri, ci), width, height, looking_for)
                     if (len(target) > 0):
                         target_cell = new_map[target[0]][target[1]]
-                        if (target_cell[1] <= 3):
+                        if (target_cell[1] <= subtract_points):
+                            if (target_cell[0] == 'E'):
+                                killed_elf = True
                             new_map[target[0]][target[1]] = '.'
                             map[target[0]][target[1]] = '.'
                             killed_this_turn = True
                         else:
-                            new_map[target[0]][target[1]] = (target_cell[0], target_cell[1]-3)
+                            new_map[target[0]][target[1]] = (target_cell[0], target_cell[1]-subtract_points)
                     else:
                         can_attack = False
                 completed_turn = (can_move or can_attack)
@@ -146,7 +153,7 @@ def turn(map, moved_last_turn, killed_last_turn):
         if (saw_G and saw_E):
             break
     combat_over = not (saw_G and saw_E)
-    return (new_map, combat_over, completed_turn, moved_this_turn, killed_this_turn)
+    return (new_map, combat_over, completed_turn, moved_this_turn, killed_this_turn, killed_elf)
 
 def print_map(map):
     line_map = ''
@@ -164,34 +171,41 @@ def print_map(map):
     print('\n\n')
 
 def game(ifilename):
-    map = []
+    print(ifilename)
+    orig_map = []
     with open(ifilename) as ifile:
         for line in ifile:
             temp_list = list(line.strip())
             for i in range(len(temp_list)):
                 if (temp_list[i] == 'G') or (temp_list[i] == 'E'):
                     temp_list[i] = (temp_list[i], 200)
-            map.append(temp_list)
-    combat_over = False
-    turns = 0
-    moved_this_turn = True
-    killed_this_turn = False
-    if (debug):
-        print("Turn: ", turns)
-        # print_map(map)
-    while (not combat_over):
-        (map, combat_over, completed_turn, moved_this_turn, killed_this_turn) = turn(map, moved_this_turn, killed_this_turn)
-        if (not combat_over) or (combat_over and completed_turn):
-            turns += 1
-        if (debug):
-            print("Turn: ", turns)
-            # print_map(map)
+            orig_map.append(temp_list)
+    points = 3
+    elf_killed = True
+    while (elf_killed):
+        elf_killed = False
+        combat_over = False
+        turns = 0
+        moved_this_turn = True
+        killed_this_turn = False
+        points += 1
+        map = copy.deepcopy(orig_map)
+        while (not combat_over):
+            (map, combat_over, completed_turn, moved_this_turn, killed_this_turn, elf_killed) = turn(map, moved_this_turn, killed_this_turn, points)
+            if (elf_killed):
+                combat_over = True
+            if (not combat_over) or (combat_over and completed_turn):
+                turns += 1
+            if (debug):
+                print("Turn: ", turns)
+                # print_map(map)
+        print("Points:", points, " Elf killed:", elf_killed, " Turns:", turns)
     sum_hp = 0
     for r in map:
         for c in r:
             if (len(c) > 1):
                 sum_hp += c[1]
-    print("Turns:", turns, "Sum:", sum_hp, "Outcome:", turns * sum_hp)
+    print("Points:", points, "Turns:", turns, "Sum:", sum_hp, "Outcome:", turns * sum_hp)
     return turns * sum_hp
 
 # assert game('15input3.txt') == 36334
@@ -200,4 +214,9 @@ def game(ifilename):
 # assert game('15input5.txt') == 27755
 # assert game('15input6.txt') == 28944
 # assert game('15input7.txt') == 18740
+assert game('15input2.txt') == 4988
+assert game('15input4.txt') == 31284
+assert game('15input5.txt') == 3478
+assert game('15input6.txt') == 6474
+assert game('15input7.txt') == 1140
 game('15input1.txt')
