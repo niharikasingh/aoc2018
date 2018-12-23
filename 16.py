@@ -1,198 +1,242 @@
 from operator import and_
 
-def addr(before, instruction, after):
+def addr(before, instruction, after=None):
     regA_value = before[instruction[1]]
     regB_value = before[instruction[2]]
     regC_index = instruction[3]
+    before[regC_index] = regA_value + regB_value
+    return before
     if (after[regC_index] == regA_value + regB_value):
         print("addr")
         return 1
     return 0
 
-def addi(before, instruction, after):
+def addi(before, instruction, after=None):
     regA_value = before[instruction[1]]
     B_value = instruction[2]
     regC_index = instruction[3]
+    before[regC_index] = regA_value + B_value
+    return before
     if (after[regC_index] == regA_value + B_value):
         print("addi")
         return 1
     return 0
 
-def mulr(before, instruction, after):
+def mulr(before, instruction, after=None):
     regA_value = before[instruction[1]]
     regB_value = before[instruction[2]]
     regC_index = instruction[3]
+    before[regC_index] = regA_value * regB_value
+    return before
     if (after[regC_index] == regA_value * regB_value):
         print("mulr")
         return 1
     return 0
 
-def muli(before, instruction, after):
+def muli(before, instruction, after=None):
     regA_value = before[instruction[1]]
     B_value = instruction[2]
     regC_index = instruction[3]
+    before[regC_index] = regA_value * B_value
+    return before
     if (after[regC_index] == regA_value * B_value):
         print("muli")
         return 1
     return 0
 
-def banr(before, instruction, after):
+def banr(before, instruction, after=None):
     regA_value = before[instruction[1]]
     regB_value = before[instruction[2]]
     regC_index = instruction[3]
+    before[regC_index] = regA_value & regB_value
+    return before
     if (after[regC_index] == regA_value & regB_value):
         print("banr")
         return 1
     return 0
 
-def bani(before, instruction, after):
+def bani(before, instruction, after=None):
     regA_value = before[instruction[1]]
     B_value = instruction[2]
     regC_index = instruction[3]
+    before[regC_index] = regA_value & B_value
+    return before
     if (after[regC_index] == regA_value & B_value):
         print("bani")
         return 1
     return 0
 
-def borr(before, instruction, after):
+def borr(before, instruction, after=None):
     regA_value = before[instruction[1]]
     regB_value = before[instruction[2]]
     regC_index = instruction[3]
+    before[regC_index] = regA_value | regB_value
+    return before
     if (after[regC_index] == regA_value | regB_value):
         print("borr")
         return 1
     return 0
 
-def bori(before, instruction, after):
+def bori(before, instruction, after=None):
     regA_value = before[instruction[1]]
     B_value = instruction[2]
     regC_index = instruction[3]
+    before[regC_index] = regA_value | B_value
+    return before
     if (after[regC_index] == regA_value | B_value):
         print("bori")
         return 1
     return 0
 
-def setr(before, instruction, after):
+def setr(before, instruction, after=None):
     regA_value = before[instruction[1]]
     regC_index = instruction[3]
+    before[regC_index] = regA_value
+    return before
     if (after[regC_index] == regA_value):
         print("setr")
         return 1
     return 0
 
-def seti(before, instruction, after):
+def seti(before, instruction, after=None):
     A_value = instruction[1]
     regC_index = instruction[3]
+    before[regC_index] = A_value
+    return before
     if (after[regC_index] == A_value):
         print("seti")
         return 1
     return 0
 
-def gtir(before, instruction, after):
+def gtir(before, instruction, after=None):
     A_value = instruction[1]
     regB_value = before[instruction[2]]
     regC_index = instruction[3]
+    before[regC_index] = int(A_value > regB_value)
+    return before
     if (after[regC_index] == int(A_value > regB_value)):
         print("gtir")
         return 1
     return 0
 
-def gtri(before, instruction, after):
+def gtri(before, instruction, after=None):
     regA_value = before[instruction[1]]
     B_value = instruction[2]
     regC_index = instruction[3]
+    before[regC_index] = int(regA_value > B_value)
+    return before
     if (after[regC_index] == int(regA_value > B_value)):
         print("gtri")
         return 1
     return 0
 
-def gtrr(before, instruction, after):
+def gtrr(before, instruction, after=None):
     regA_value = before[instruction[1]]
     regB_value = before[instruction[2]]
     regC_index = instruction[3]
+    before[regC_index] = int(regA_value > regB_value)
+    return before
     if (after[regC_index] == int(regA_value > regB_value)):
         print("gtrr")
         return 1
     return 0
 
-def eqir(before, instruction, after):
+def eqir(before, instruction, after=None):
     A_value = instruction[1]
     regB_value = before[instruction[2]]
     regC_index = instruction[3]
+    before[regC_index] = int(A_value == regB_value)
+    return before
     if (after[regC_index] == int(A_value == regB_value)):
         print("eqir")
         return 1
     return 0
 
-def eqri(before, instruction, after):
+def eqri(before, instruction, after=None):
     regA_value = before[instruction[1]]
     B_value = instruction[2]
     regC_index = instruction[3]
+    before[regC_index] = int(regA_value == B_value)
+    return before
     if (after[regC_index] == int(regA_value == B_value)):
         print("eqri")
         return 1
     return 0
 
-def eqrr(before, instruction, after):
+def eqrr(before, instruction, after=None):
     regA_value = before[instruction[1]]
     regB_value = before[instruction[2]]
     regC_index = instruction[3]
+    before[regC_index] = int(regA_value == regB_value)
+    return before
     if (after[regC_index] == int(regA_value == regB_value)):
         print("eqrr")
         return 1
     return 0
 
-with open('16input1.txt') as ifile:
-    all_lines = []
-    for line in ifile:
-        line = line.strip().split(',')
-        line = [int(e) for e in line]
-        all_lines.append(line)
+# with open('16input1.txt') as ifile:
+#     all_lines = []
+#     for line in ifile:
+#         line = line.strip().split(',')
+#         line = [int(e) for e in line]
+#         all_lines.append(line)
 # answer = 0
-answer = [[1]*16 for i in range(16)]
-for line in all_lines:
-    b = line[0:4]
-    i = line[4:8]
-    a = line[8:12]
-    temp_answer = [addr(b, i, a), addi(b, i, a), mulr(b, i, a), muli(b, i, a), banr(b, i, a), bani(b, i, a), borr(b, i, a), bori(b, i, a), setr(b, i, a), seti(b, i, a), gtir(b, i, a), gtri(b, i, a), gtrr(b, i, a), eqir(b, i, a), eqri(b, i, a), eqrr(b, i, a)]
-    operator = i[0]
-    answer[operator] = list(map(and_, answer[operator], temp_answer))
-for o in answer:
-    print(sum(o), '\t', o)
+# answer = [[1]*16 for i in range(16)]
+# for line in all_lines:
+#     b = line[0:4]
+#     i = line[4:8]
+#     a = line[8:12]
+#     temp_answer = [addr(b, i, a), addi(b, i, a), mulr(b, i, a), muli(b, i, a), banr(b, i, a), bani(b, i, a), borr(b, i, a), bori(b, i, a), setr(b, i, a), seti(b, i, a), gtir(b, i, a), gtri(b, i, a), gtrr(b, i, a), eqir(b, i, a), eqri(b, i, a), eqrr(b, i, a)]
+#     operator = i[0]
+#     answer[operator] = list(map(and_, answer[operator], temp_answer))
+# for o in answer:
+#     print(sum(o), '\t', o)
 
 # mapping functions
-def send_to_function(opcode, b, i, a):
+def send_to_function(opcode, b, i):
+    a = []
     if (opcode == 0):
-        bori(b, i, a)
+        a = bori(b, i)
     elif (opcode == 1):
-        muli(b, i, a)
+        a = muli(b, i)
     elif (opcode == 2):
-        banr(b, i, a)
+        a = banr(b, i)
     elif (opcode == 3):
-        bani(b, i, a)
+        a = bani(b, i)
     elif (opcode == 4):
-        gtir(b, i, a)
+        a = gtir(b, i)
     elif (opcode == 5):
-        setr(b, i, a)
+        a = setr(b, i)
     elif (opcode == 6):
-        addr(b, i, a)
+        a = addr(b, i)
     elif (opcode == 7):
-        eqir(b, i, a)
+        a = eqir(b, i)
     elif (opcode == 8):
-        seti(b, i, a)
+        a = seti(b, i)
     elif (opcode == 9):
-        addi(b, i, a)
+        a = addi(b, i)
     elif (opcode == 10):
-        eqrr(b, i, a)
+        a = eqrr(b, i)
     elif (opcode == 11):
-        eqri(b, i, a)
+        a = eqri(b, i)
     elif (opcode == 12):
-        borr(b, i, a)
+        a = borr(b, i)
     elif (opcode == 13):
-        gtrr(b, i, a)
+        a = gtrr(b, i)
     elif (opcode == 14):
-        mulr(b, i, a)
+        a = mulr(b, i)
     elif (opcode == 15):
-        gtri(b, i, a)
+        a = gtri(b, i)
+    return a
 
-# 599 too low
+instructions = []
+with open('16input2.txt') as ifile:
+    for line in ifile:
+        line = line.strip().split(' ')
+        line = [int(e) for e in line]
+        instructions.append(line)
+registers = [0, 0, 0, 0]
+for i in instructions:
+    next_registers = send_to_function(i[0], registers, i)
+    registers = next_registers
+print(registers)
